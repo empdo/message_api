@@ -8,7 +8,7 @@ import secrets from "./secrets.json";
 const pool = mariadb.createPool({
   host: '192.168.0.153',
   user: 'emil',
-  password: 'password',
+  password: secrets.mariadbPassword,
   database: 'message_app',
   connectionLimit: 5
 });
