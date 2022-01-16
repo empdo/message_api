@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { json } from 'express';
 import mariadb from 'mariadb';
 import jwt from 'jsonwebtoken';
 import bcrypt, { hash } from 'bcrypt'; 
@@ -32,6 +32,19 @@ let getTableData = async (conn: mariadb.PoolConnection, table: string) => {
 
 }
 
+const getId = (token: string) => {
+  const user = jwt.decode(token);
+
+  return user?.sub;
+} 
+
+const getMessages = async (conn: mariadb.PoolConnection, token: string) => {
+  const id = getId(token);
+  console.log(id);
+
+  return await conn.query("select * from messages where receiver=? or sender=?;", [id, id]);
+}
+
 let sendMessage = async (conn: mariadb.PoolConnection, content: string, sender: number, reciver: number)  => {
       return conn.query("INSERT INTO messages (content, sender, receiver) VALUES (?, ?, ?);", [content, sender, reciver]);
 }
@@ -59,7 +72,6 @@ const getToken = async (conn: mariadb.PoolConnection, name: string, password: st
         }
 
         return createToken(name, informationResponse.insertId);
-
 }
 
 pool.getConnection()
@@ -83,13 +95,18 @@ pool.getConnection()
       res.send(users);
     });
 
-    app.get("/messages", async (req, res) => {
-      const messages = await getTableData(conn, "messages");
+    app.post("/messages", async (req, res) => {
+      const {token} = req.body;
+      const messages = await getMessages(conn, token);
       res.send(messages);
     });
 
     app.post("/send", async (req, res) => {
-      const {content, sender, reciver} = req.body;
+      const {content, token, sender, reciver} = req.body;
+
+      if(getId(token) !== sender){
+        res.sendStatus(401);
+      }
 
       const messageRresponse = await sendMessage(conn, content, sender, reciver);
       res.send(messageRresponse);
