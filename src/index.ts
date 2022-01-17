@@ -1,9 +1,8 @@
-import express, { json } from 'express';
+import express, { response } from 'express';
 import mariadb from 'mariadb';
 import jwt from 'jsonwebtoken';
-import bcrypt, { hash } from 'bcrypt'; 
+import bcrypt from 'bcrypt'; 
 import secrets from "./secrets.json";
-import { getTypeParameterOwner } from 'typescript';
 
 
 const pool = mariadb.createPool({
@@ -14,18 +13,11 @@ const pool = mariadb.createPool({
   connectionLimit: 5
 });
 
-
 var app = express();
 app.use(express.json());
 const port = 4789
 
-var users = {
-  "aaron": {
-    "något": "något"
-  }
-}
-
-let getTableData = async (conn: mariadb.PoolConnection, table: string) => {
+const getTableData = async (conn: mariadb.PoolConnection, table: string) => {
   const res = await conn.query(`select * from ${table};`)
 
   return res;
@@ -45,8 +37,8 @@ const getMessages = async (conn: mariadb.PoolConnection, token: string) => {
   return await conn.query("select * from messages where receiver=? or sender=?;", [id, id]);
 }
 
-let sendMessage = async (conn: mariadb.PoolConnection, content: string, sender: number, reciver: number)  => {
-      return conn.query("INSERT INTO messages (content, sender, receiver) VALUES (?, ?, ?);", [content, sender, reciver]);
+const sendMessage = async (conn: mariadb.PoolConnection, content: string, sender: number, reciver: number)  => {
+      return conn.query("INSERT INTO messages (content, sender, receiver, date) VALUES (?, ?, ?, ?);", [content, sender, reciver, Date.now()]);
 }
 
 const createUser = async (conn: mariadb.PoolConnection, name: string, password: string) => {
@@ -87,7 +79,12 @@ pool.getConnection()
     app.post("/auth", async (req, res) => {
         const {name, password} = req.body;
 
-        res.send( await getToken(conn, name, password));
+        if(name && password) {
+          res.send( await getToken(conn, name, password));
+        }else {
+          res.sendStatus(401);
+        }
+
     });
 
     app.get("/users", async (req, res) => {
