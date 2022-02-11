@@ -19,7 +19,7 @@ const pool = mariadb.createPool({
 var app = express();
 app.use(express.json());
 app.use(cors());
-const port = 4789
+const port = parseInt(process.env.SERVER_PORT) || 4789;
 
 const getTableData = async (conn: mariadb.PoolConnection, table: string) => {
     const res = await conn.query(`select * from ${table};`)
