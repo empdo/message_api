@@ -12,6 +12,7 @@ import { Conversation, Config } from './interfaces';
 
 const config: Config = {
     jwtSecret: process.env.JWT_SECRET || "",
+    host: process.env.HOST || "127.0.0.1",
     mariadb: {
         host: process.env.MARIADB_HOST || "127.0.0.1",
         user: process.env.MARIADB_USER || "",
@@ -198,7 +199,7 @@ pool.getConnection()
 
         });
 
-        app.listen(config.port, () =>
+        app.listen(config.port, config.host, () =>
             console.log(`Example app listening on port ${config.port}!`),
         );
 

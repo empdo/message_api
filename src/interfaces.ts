@@ -13,6 +13,7 @@ export interface Conversation {
 
 export type Config = {
     [key: string]: any,
+    host: strin,
     jwtSecret: string,
     mariadb: {
         host: string,
