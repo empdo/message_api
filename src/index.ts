@@ -4,6 +4,9 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
 import fs from "fs";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 import { Conversation, Config } from './interfaces';
 
