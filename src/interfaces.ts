@@ -10,3 +10,16 @@ export interface Conversation {
     receiver: number,
     date: number
 }
+
+export type Config = {
+    [key: string]: any,
+    jwtSecret: string,
+    mariadb: {
+        host: string,
+        user: string,
+        password: string,
+        database: string,
+        port: number
+    },
+    port: number
+};

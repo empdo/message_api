@@ -2,24 +2,39 @@ import express, { response } from 'express';
 import mariadb from 'mariadb';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import secrets from "./secrets.json";
 import cors from 'cors';
+import fs from "fs";
 
-import { Conversation } from './interfaces';
+import { Conversation, Config } from './interfaces';
 
+const config: Config = {
+    jwtSecret: process.env.JWT_SECRET || "",
+    mariadb: {
+        host: process.env.MARIADB_HOST || "",
+        user: process.env.MARIADB_USER || "",
+        password: process.env.MARIADB_PASSWORD || "",
+        database: process.env.MARIADB_DATABASE || "",
+        port: parseInt(process.env.MARIADB_PORT || ""),
+    },
+    port: parseInt(process.env.PORT || "")
+};
+
+// Validate that config was created correctly using a loop
+for (const key in config) {
+    if (!config[key]) {
+        console.error(`Missing config for ${key}`);
+        process.exit(1);
+    }
+}
 
 const pool = mariadb.createPool({
-    host: '192.168.0.153',
-    user: 'emil',
-    password: secrets.mariadbPassword,
-    database: 'message_app',
-    connectionLimit: 5
+    ...config.mariadb,
+    connectionLimit: 5,
 });
 
 var app = express();
 app.use(express.json());
 app.use(cors());
-const port = parseInt(process.env.SERVER_PORT) || 4789;
 
 const getTableData = async (conn: mariadb.PoolConnection, table: string) => {
     const res = await conn.query(`select * from ${table};`)
@@ -94,7 +109,7 @@ const getConversations = async (conn: mariadb.PoolConnection, id: number) => {
 
 
 const createToken = (name: string, id: number) => {
-    return jwt.sign({ "sub": id, "name": name, "iat": Math.round(Date.now() / 1000) }, secrets.jwt)
+    return jwt.sign({ "sub": id, "name": name, "iat": Math.round(Date.now() / 1000) }, config.jwtSecret);
 }
 
 const getToken = async (conn: mariadb.PoolConnection, name: string, password: string) => {
@@ -180,8 +195,8 @@ pool.getConnection()
 
         });
 
-        app.listen(port, () =>
-            console.log(`Example app listening on port ${port}!`),
+        app.listen(config.port, () =>
+            console.log(`Example app listening on port ${config.port}!`),
         );
 
     }).catch(err => {
