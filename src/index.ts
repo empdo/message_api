@@ -10,13 +10,13 @@ import { Conversation, Config } from './interfaces';
 const config: Config = {
     jwtSecret: process.env.JWT_SECRET || "",
     mariadb: {
-        host: process.env.MARIADB_HOST || "",
+        host: process.env.MARIADB_HOST || "127.0.0.1",
         user: process.env.MARIADB_USER || "",
         password: process.env.MARIADB_PASSWORD || "",
         database: process.env.MARIADB_DATABASE || "",
-        port: parseInt(process.env.MARIADB_PORT || ""),
+        port: parseInt(process.env.MARIADB_PORT || "3306"),
     },
-    port: parseInt(process.env.PORT || "")
+    port: parseInt(process.env.PORT || "4678")
 };
 
 // Validate that config was created correctly using a loop
