@@ -130,6 +130,24 @@ const getToken = async (conn: mariadb.PoolConnection, name: string, password: st
 pool.getConnection()
     .then(conn => {
 
+        conn.query(`CREATE TABLE IF NOT EXISTS "users" (
+            "id" int(11) NOT NULL AUTO_INCREMENT,
+            "name" varchar(255) NOT NULL,
+            "password" binary(60) NOT NULL,
+            PRIMARY KEY ("id")
+          )`);
+
+        conn.query(`CREATE TABLE IF NOT EXISTS "messages" (
+            "id" int(11) NOT NULL AUTO_INCREMENT,
+            "content" text NOT NULL,
+            "sender" int(11) NOT NULL,
+            "receiver" int(11) NOT NULL,
+            "date" int(11) DEFAULT NULL,
+            PRIMARY KEY ("id"),
+            KEY "receiver" ("receiver"),
+            CONSTRAINT "messages_ibfk_1" FOREIGN KEY ("receiver") REFERENCES "users" ("id")
+          )`)
+
         app.post("/user", async (req, res) => {
             const { name, password } = req.body;
 
