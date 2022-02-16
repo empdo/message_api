@@ -71,7 +71,9 @@ const createUser = async (conn: mariadb.PoolConnection, name: string, password: 
     `, [name, name, passwordHash]);
 
 
-    return createToken(name, insertResponse.insertId);
+    return insertResponse;
+
+    //return createToken(name, insertResponse.insertId);
 
 }
 
