@@ -151,14 +151,15 @@ pool.getConnection()
         app.post("/user", async (req, res) => {
             const { name, password } = req.body;
 
+            console.log(name, password);
+
             const createUserRespons = await createUser(conn, name, password);
             res.send(createUserRespons);
 
         });
 
         app.post("/auth", async (req, res) => {
-            const { name } = req.body;
-            const password = req.headers["password"] as string;
+            const { name, password } = req.body;
 
             if (name && password) {
 
@@ -172,6 +173,7 @@ pool.getConnection()
 
         app.get("/users", async (req, res) => {
             const users = await getTableData(conn, "users");
+
             res.send(users);
         });
 
