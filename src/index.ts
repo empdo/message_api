@@ -145,7 +145,7 @@ pool.getConnection()
             date int(11) DEFAULT NULL,
             PRIMARY KEY (id),
             KEY receiver (receiver),
-            CONSTRAINT "messages_ibfk_1 FOREIGN KEY (receiver) REFERENCES users (id)
+            CONSTRAINT messages_ibfk_1 FOREIGN KEY (receiver) REFERENCES users (id)
           )`);
 
         app.post("/user", async (req, res) => {
