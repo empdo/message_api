@@ -3,7 +3,6 @@ import mariadb from 'mariadb';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
-import fs from "fs";
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -78,7 +77,11 @@ const getUser = async (conn: mariadb.PoolConnection, id: number) => {
 
     const user = await conn.query("SELECT * FROM users WHERE id = ?;", [id]);
 
-    return user[0].name;
+    if(user[0]) {
+        return user[0].name;
+    }
+
+    return null;
 }
 
 const getReqUserId = async (conn: mariadb.PoolConnection, req: { headers: { authorization?: string | undefined } }) => {
@@ -89,6 +92,7 @@ const getReqUserId = async (conn: mariadb.PoolConnection, req: { headers: { auth
 
         if (decodedJwt && decodedJwt.sub) {
             const user = parseInt(decodedJwt.sub);
+
             if(!(await getUser(conn, parseInt(decodedJwt.sub)))) return null;
 
             return user;
@@ -203,6 +207,7 @@ pool.getConnection()
             }
 
             const conversation = await getConversation(conn, userId, id);
+
             res.send({messages: conversation, name: await getUser(conn, id)});
         });
 
