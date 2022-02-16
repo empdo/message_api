@@ -63,11 +63,10 @@ const createUser = async (conn: mariadb.PoolConnection, name: string, password: 
 
     const getResponse = await conn.query("SELECT * FROM users WHERE name = ?;", [name]);
 
-    if(getResponse[0]) {
-        const insertResponse = await conn.query(` INSERT INTO users (name, password) VALUES (?, ?)`, [name, passwordHash]);
+    if(!getResponse[0]) {
+        const insertResponse = await conn.query("INSERT INTO users (name, password) VALUES (?, ?)", [name, passwordHash]);
 
         return createToken(name, insertResponse.insertId);
-
     }
 
 
