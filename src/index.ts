@@ -81,7 +81,7 @@ const getUser = async (conn: mariadb.PoolConnection, id: number) => {
     return user[0].name;
 }
 
-const getReqUserId = (req: { headers: { authorization?: string | undefined } }) => {
+const getReqUserId = async (conn: mariadb.PoolConnection, req: { headers: { authorization?: string | undefined } }) => {
     const [type, token] = req.headers["authorization"]?.split(" ") || [null, null];
 
     if (type === "Bearer" && token) {
@@ -89,9 +89,12 @@ const getReqUserId = (req: { headers: { authorization?: string | undefined } }) 
 
         if (decodedJwt && decodedJwt.sub) {
             const user = parseInt(decodedJwt.sub);
+            if(!(await getUser(conn, parseInt(decodedJwt.sub)))) return null;
+
             return user;
         }
     }
+
     return null;
 }
 
@@ -192,7 +195,7 @@ pool.getConnection()
             const auth = req.headers["authorization"];
             const id = parseInt(req.params.id);
 
-            const userId = getReqUserId(req);
+            const userId = await getReqUserId(conn, req);
 
             if (!userId || !id) {
                 res.sendStatus(401);
@@ -204,7 +207,7 @@ pool.getConnection()
         });
 
         app.get("/conversations", async (req, res) => {
-            const userId = getReqUserId(req);
+            const userId = await getReqUserId(conn, req);
 
             if (!userId) {
                 res.sendStatus(401);
@@ -219,7 +222,7 @@ pool.getConnection()
 
         app.post("/send", async (req, res) => {
             const { content, reciver } = req.body;
-            const userId = getReqUserId(req);
+            const userId = await getReqUserId(conn,req);
 
             if (!userId) {
                 res.sendStatus(401);
