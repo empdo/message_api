@@ -162,7 +162,7 @@ pool.getConnection()
             const { name, password } = req.body;
 
             if (name && password) {
-
+                console.log(name, password);
                 const data = { token: await getToken(conn, name, password) }
                 res.send(data);
             } else {
