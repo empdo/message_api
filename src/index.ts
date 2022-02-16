@@ -157,7 +157,8 @@ pool.getConnection()
         });
 
         app.post("/auth", async (req, res) => {
-            const { name, password } = req.body;
+            const { name } = req.body;
+            const password = req.headers["password"] as string;
 
             if (name && password) {
 
