@@ -61,19 +61,17 @@ const createUser = async (conn: mariadb.PoolConnection, name: string, password: 
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const insertResponse = await conn.query(`
-        IF NOT EXISTS (SELECT * FROM users
-                            WHERE name = name)
-        BEGIN
-            INSERT INTO users (name, password)
-            VALUES (?, ?, ?)
-        END
-    `, [name, name, passwordHash]);
+    const getResponse = await conn.query("SELECT * FROM users WHERE name = ?;", [name]);
+
+    if(getResponse[0]) {
+        const insertResponse = await conn.query(` INSERT INTO users (name, password) VALUES (?, ?, ?)`, [name, name, passwordHash]);
+
+        return createToken(name, insertResponse.insertId);
+
+    }
 
 
-    return insertResponse;
-
-    //return createToken(name, insertResponse.insertId);
+    return null;
 
 }
 
@@ -163,7 +161,13 @@ pool.getConnection()
             console.log(name, password);
 
             const createUserRespons = await createUser(conn, name, password);
-            res.send(createUserRespons);
+
+            if (createUserRespons != null) {
+                res.send(createUserRespons);
+            } else {
+                res.sendStatus(401);
+            }
+
 
         });
 
