@@ -200,7 +200,7 @@ pool.getConnection()
             }
 
             const conversation = await getConversation(conn, userId, id);
-            res.send(conversation);
+            res.send({messages: conversation, name: await getUser(conn, id)});
         });
 
         app.get("/conversations", async (req, res) => {
