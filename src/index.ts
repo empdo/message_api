@@ -164,8 +164,6 @@ pool.getConnection()
         app.post("/user", async (req, res) => {
             const { name, password } = req.body;
 
-            console.log(name, password);
-
             const createUserRespons = await createUser(conn, name, password);
 
             if (createUserRespons != null) {
@@ -239,10 +237,9 @@ pool.getConnection()
 
         });
 
-        app.listen(config.port, config.host, () =>
-            console.log(`Example app listening on port ${config.port}!`),
+        app.listen(config.port, config.host, () =>{
+            console.log(`Example app listening on port ${config.port}!`);
+            console.log("started"); }
         );
 
-    }).catch(err => {
-        //not connected
     });
