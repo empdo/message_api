@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-import { Conversation, Config } from './interfaces';
+import { Config } from './interfaces';
 
 const config: Config = {
     jwtSecret: process.env.JWT_SECRET || "",
@@ -46,12 +46,6 @@ const getTableData = async (conn: mariadb.PoolConnection, table: string) => {
 
 }
 
-const getId = (token: string) => {
-    const user = jwt.decode(token);
-
-    return user?.sub;
-}
-
 const sendMessage = async (conn: mariadb.PoolConnection, content: string, sender: number, reciver: number,) => {
     return conn.query("INSERT INTO messages (content, sender, receiver, date) VALUES (?, ?, ?, ?);", [content, sender, reciver, Math.round(Date.now() / 1000)]);
 }
@@ -88,7 +82,15 @@ const getReqUserId = async (conn: mariadb.PoolConnection, req: { headers: { auth
     const [type, token] = req.headers["authorization"]?.split(" ") || [null, null];
 
     if (type === "Bearer" && token) {
+
+        try {
+            jwt.verify(token, config.jwtSecret);
+        } catch (err) {
+            return null;
+        }
+
         const decodedJwt = jwt.decode(token, { json: true });
+
 
         if (decodedJwt && decodedJwt.sub) {
             const user = parseInt(decodedJwt.sub);
