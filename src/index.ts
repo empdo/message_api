@@ -1,15 +1,28 @@
-import express, { response } from 'express';
+import express  from 'express';
 import mariadb from 'mariadb';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import expressWs from "express-ws";
+
+import events from "events";
+
+
+class Events extends events.EventEmitter {
+    constructor() { 
+        super();
+    }
+
+}
+
+export const em = new Events();
 
 dotenv.config();
 
-import { Config } from './interfaces';
+import { Config, Message } from './interfaces';
 
-const config: Config = {
+export const config: Config = {
     jwtSecret: process.env.JWT_SECRET || "",
     host: process.env.HOST || "127.0.0.1",
     mariadb: {
@@ -35,19 +48,29 @@ const pool = mariadb.createPool({
     connectionLimit: 5,
 });
 
-var app = express();
+export let { app } = expressWs(express());
+
 app.use(express.json());
 app.use(cors());
 
+expressWs(app);
+
+
 const getTableData = async (conn: mariadb.PoolConnection, table: string) => {
     const res = await conn.query(`select * from ${table};`)
-
+    
     return res;
 
 }
 
-const sendMessage = async (conn: mariadb.PoolConnection, content: string, sender: number, reciver: number,) => {
-    return conn.query("INSERT INTO messages (content, sender, receiver, date) VALUES (?, ?, ?, ?);", [content, sender, reciver, Math.round(Date.now() / 1000)]);
+const sendMessage = async (conn: mariadb.PoolConnection, content: string, sender: number, receiver: number,) => {
+    const date = Math.round(Date.now() / 1000);
+    const query = await conn.query("INSERT INTO messages (content, sender, receiver, date) VALUES (?, ?, ?, ?);", [content, sender, receiver, date]);
+
+    em.emit("dbChange", {id: query.insertId, sender, receiver, content, date} as Message)
+
+    return query;
+
 }
 
 const createUser = async (conn: mariadb.PoolConnection, name: string, password: string) => {
@@ -56,7 +79,7 @@ const createUser = async (conn: mariadb.PoolConnection, name: string, password: 
 
     const getResponse = await conn.query("SELECT * FROM users WHERE name = ?;", [name]);
 
-    if(!getResponse[0]) {
+    if (!getResponse[0]) {
         const insertResponse = await conn.query("INSERT INTO users (name, password) VALUES (?, ?)", [name, passwordHash]);
 
         return createToken(name, insertResponse.insertId);
@@ -71,7 +94,7 @@ const getUser = async (conn: mariadb.PoolConnection, id: number) => {
 
     const user = await conn.query("SELECT * FROM users WHERE id = ?;", [id]);
 
-    if(user[0]) {
+    if (user[0]) {
         return user[0].name;
     }
 
@@ -95,7 +118,7 @@ const getReqUserId = async (conn: mariadb.PoolConnection, req: { headers: { auth
         if (decodedJwt && decodedJwt.sub) {
             const user = parseInt(decodedJwt.sub);
 
-            if(!(await getUser(conn, parseInt(decodedJwt.sub)))) return null;
+            if (!(await getUser(conn, parseInt(decodedJwt.sub)))) return null;
 
             return user;
         }
@@ -113,13 +136,13 @@ const getConversation = async (conn: mariadb.PoolConnection, userId: number, con
 const getConversations = async (conn: mariadb.PoolConnection, id: number) => {
     const messages = await conn.query("SELECT * FROM messages WHERE receiver = ? or sender = ?", [id, id]);
 
-    const conversations: {id: number, name: string}[]  = [];
+    const conversations: { id: number, name: string }[] = [];
 
     for (const message of messages) {
         const realId = message.sender === id ? message.receiver : message.sender;
 
         if (!conversations.some(conversation => conversation.id === realId)) {
-            conversations.push({id : realId, name : await getUser(conn, realId)});
+            conversations.push({ id: realId, name: await getUser(conn, realId) });
         }
     }
 
@@ -208,7 +231,7 @@ pool.getConnection()
 
             const conversation = await getConversation(conn, userId, id);
 
-            res.send({messages: conversation, name: await getUser(conn, id)});
+            res.send({ messages: conversation, name: await getUser(conn, id) });
         });
 
         app.get("/conversations", async (req, res) => {
@@ -227,7 +250,7 @@ pool.getConnection()
 
         app.post("/send", async (req, res) => {
             const { content, reciver } = req.body;
-            const userId = await getReqUserId(conn,req);
+            const userId = await getReqUserId(conn, req);
 
             if (!userId) {
                 res.sendStatus(401);
@@ -237,11 +260,13 @@ pool.getConnection()
             const messageRresponse = await sendMessage(conn, content, userId, reciver);
             res.send(messageRresponse);
 
+
         });
 
-        app.listen(config.port, config.host, () =>{
+        app.listen(config.port, config.host, () => {
             console.log(`Example app listening on port ${config.port}!`);
-            console.log("started"); }
+            console.log("started");
+        }
         );
 
     });

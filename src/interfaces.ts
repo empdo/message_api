@@ -11,6 +11,14 @@ export interface Conversation {
     date: number
 }
 
+export interface Message {
+    id: number;
+    sender: number;
+    receiver: number;
+    date: number;
+    content: string;
+}
+
 export type Config = {
     [key: string]: any,
     host: string,
