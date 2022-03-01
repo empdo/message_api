@@ -98,13 +98,15 @@ const getConversation = async (conn: mariadb.PoolConnection, userId: number, con
 const getConversations = async (conn: mariadb.PoolConnection, id: number) => {
     const messages = await conn.query("SELECT * FROM messages WHERE receiver = ? or sender = ?", [id, id]);
 
-    const conversations: {id: number, name: string}[]  = [];
+    const conversations: {id: number, name: string, lastmessage: number}[]  = [];
 
     for (const message of messages) {
         const realId = message.sender === id ? message.receiver : message.sender;
 
-        if (!conversations.some(conversation => conversation.id === realId)) {
-            conversations.push({id : realId, name : await getUser(conn, realId)});
+        if (!conversations.find(conversation => conversation.id === realId)) {
+            conversations.push({id : realId, name : await getUser(conn, realId), lastmessage: message.date});
+        }else {
+
         }
     }
 
