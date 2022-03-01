@@ -103,12 +103,16 @@ const getConversations = async (conn: mariadb.PoolConnection, id: number) => {
     for (const message of messages) {
         const realId = message.sender === id ? message.receiver : message.sender;
 
-        if (!conversations.find(conversation => conversation.id === realId)) {
+        const conversation = conversations.find(conversation => conversation.id === realId);
+
+        if (!conversation) {
             conversations.push({id : realId, name : await getUser(conn, realId), lastmessage: message.date});
         }else {
-
+            conversation.lastmessage = conversation.lastmessage < message.date ? message.date : conversation.lastmessage;
         }
     }
+
+    conversations.sort((a,b) => (a.lastmessage > b.lastmessage ) ? 1 : ((b.lastmessage > a.lastmessage) ? -1 : 0))
 
     return conversations;
 }

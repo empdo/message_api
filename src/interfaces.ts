@@ -8,7 +8,16 @@ export interface Conversation {
     content: string,
     sender: number,
     receiver: number,
-    date: number
+    date: number,
+    lastmessage: number,
+}
+
+export interface Message {
+    id: number;
+    sender: number;
+    receiver: number;
+    date: number;
+    content: string;
 }
 
 export type Config = {
