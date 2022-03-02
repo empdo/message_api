@@ -150,7 +150,7 @@ const getConversations = async (conn: mariadb.PoolConnection, id: number) => {
         }
     }
 
-    conversations.sort((a,b) => (a.lastmessage > b.lastmessage ) ? 1 : ((b.lastmessage > a.lastmessage) ? -1 : 0))
+    conversations.sort((a,b) => (a.lastmessage > b.lastmessage ) ? -1 : ((b.lastmessage > a.lastmessage) ? 1 : 0))
 
     return conversations;
 }
