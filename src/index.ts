@@ -273,6 +273,7 @@ pool.getConnection()
             const {blob} = req.body;
 
             const id = await getReqUserId(conn, req);
+            console.log(blob);
 
             if (blob) {
                 saveAs(blob, (id + ".jpeg"))
