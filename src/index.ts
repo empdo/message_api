@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import expressWs from "express-ws";
+import { saveAs } from 'file-saver';
 
 import events from "events";
 
