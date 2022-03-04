@@ -269,6 +269,18 @@ pool.getConnection()
 
         });
 
+        app.post("/profilepic", async (req, res) => {
+            const {blob} = req.body;
+
+            const id = await getReqUserId(conn, req);
+
+            if (blob) {
+                saveAs(blob, (id + ".jpeg"))
+            }
+
+            res.sendStatus(200);
+        });
+
         app.listen(config.port, config.host, () => {
             console.log(`Example app listening on port ${config.port}!`);
             console.log("started");
