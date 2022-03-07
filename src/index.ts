@@ -54,7 +54,7 @@ export let { app } = expressWs(express());
 
 app.use(express.json());
 app.use(cors());
-app.use("pictures");
+app.use(express.static("pictures"));
 
 expressWs(app);
 
