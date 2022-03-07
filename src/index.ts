@@ -6,6 +6,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import expressWs from "express-ws";
 
+import fs from "fs";
+
 import events from "events";
 
 
@@ -273,18 +275,19 @@ pool.getConnection()
             const {blob} = req.body;
 
             const id = await getReqUserId(conn, req);
-            console.log(blob);
 
             if (blob) {
                 var base64Data = blob.replace(/^data:image\/png;base64,/, "");
 
-                require("fs").writeFile(id + ".png", base64Data, 'base64', () => {
+               fs.writeFile(id + ".png", base64Data, 'base64', () => {
                   console.log("error");
                 });
             }
 
             res.sendStatus(200);
         });
+
+        app.use("/profilepictures/:id", express.static(__dirname + "/pictures"));
 
         app.listen(config.port, config.host, () => {
             console.log(`Example app listening on port ${config.port}!`);
