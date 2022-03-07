@@ -5,7 +5,6 @@ import bcrypt from 'bcrypt';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import expressWs from "express-ws";
-import { saveAs } from 'file-saver';
 
 import events from "events";
 
@@ -277,7 +276,11 @@ pool.getConnection()
             console.log(blob);
 
             if (blob) {
-                saveAs(blob, (id + ".jpeg"))
+                var base64Data = blob.replace(/^data:image\/png;base64,/, "");
+
+                require("fs").writeFile(id + ".png", base64Data, 'base64', () => {
+                  console.log("error");
+                });
             }
 
             res.sendStatus(200);
