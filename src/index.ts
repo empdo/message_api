@@ -289,7 +289,7 @@ pool.getConnection()
             res.sendStatus(200);
         });
 
-        app.use("/profilepictures", express.static(path.join(__dirname, 'pictures')));
+        app.use("/static", express.static('pictures'));
 
         app.listen(config.port, config.host, () => {
             console.log(`Example app listening on port ${config.port}!`);
