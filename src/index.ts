@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import expressWs from "express-ws";
+import path from "path";
 
 import fs from "fs";
 
@@ -288,7 +289,7 @@ pool.getConnection()
             res.sendStatus(200);
         });
 
-        app.use("/profilepictures", express.static(__dirname + "/pictures"));
+        app.use("/profilepictures", express.static(path.join(__dirname, 'pictures')));
 
         app.listen(config.port, config.host, () => {
             console.log(`Example app listening on port ${config.port}!`);
