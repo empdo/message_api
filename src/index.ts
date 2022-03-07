@@ -287,7 +287,7 @@ pool.getConnection()
             res.sendStatus(200);
         });
 
-        app.use("/profilepictures/:id", express.static(__dirname + "/pictures"));
+        app.use("/profilepictures", express.static(__dirname + "/pictures"));
 
         app.listen(config.port, config.host, () => {
             console.log(`Example app listening on port ${config.port}!`);
