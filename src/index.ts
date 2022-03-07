@@ -279,7 +279,7 @@ pool.getConnection()
             if (blob) {
                 var base64Data = blob.replace(/^data:image\/png;base64,/, "");
 
-               fs.writeFile(`/pictures/${id}.png`, base64Data, 'base64', () => {
+               fs.writeFile(`./pictures/${id}.png`, base64Data, 'base64', () => {
                   console.log("error");
                 });
             }
