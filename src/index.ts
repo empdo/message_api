@@ -24,6 +24,7 @@ export const em = new Events();
 dotenv.config();
 
 import { Config, Message } from './interfaces';
+import { updateReturn } from 'typescript';
 
 export const config: Config = {
     jwtSecret: process.env.JWT_SECRET || "",
@@ -99,7 +100,7 @@ const getUser = async (conn: mariadb.PoolConnection, id: number) => {
     const user = await conn.query("SELECT * FROM users WHERE id = ?;", [id]);
 
     if (user[0]) {
-        return user[0].name;
+        return user[0];
     }
 
     return null;
@@ -147,8 +148,8 @@ const getConversations = async (conn: mariadb.PoolConnection, id: number) => {
 
         const conversation = conversations.find(conversation => conversation.id === realId);
 
-        if (!conversation) {
-            conversations.push({id : realId, name : await getUser(conn, realId), lastmessage: message.date});
+        if (!conversation){
+            conversations.push({id : realId, name : (await getUser(conn, realId)).name, lastmessage: message.date});
         }else {
             conversation.lastmessage = conversation.lastmessage < message.date ? message.date : conversation.lastmessage;
         }
@@ -241,8 +242,9 @@ pool.getConnection()
             }
 
             const conversation = await getConversation(conn, userId, id);
+            const user = await getUser(conn, id);
 
-            res.send({ messages: conversation, name: await getUser(conn, id) });
+            res.send({ messages: conversation, name: user.name, pictrue: user.pictrue});
         });
 
         app.get("/conversations", async (req, res) => {
@@ -286,7 +288,7 @@ pool.getConnection()
                   console.log("error");
                 });
                 
-                conn.query(`UPDATE users SET picture=${id}.png WHERE id=${id}`);
+                await conn.query(`UPDATE users SET picture=${id}.png WHERE id=${id}`);
             }
 
             res.sendStatus(200);

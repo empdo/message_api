@@ -1,7 +1,7 @@
 export interface User {
     id: number;
     name: string;
-    picture: string;
+    picture: string | undefined;
 }
 
 export interface Conversation {
