@@ -243,6 +243,7 @@ pool.getConnection()
 
             const conversation = await getConversation(conn, userId, id);
             const user = await getUser(conn, id);
+            console.log(user);
 
             res.send({ messages: conversation, name: user.name, pictrue: user.pictrue});
         });
