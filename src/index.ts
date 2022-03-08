@@ -288,7 +288,7 @@ pool.getConnection()
                   console.log("error");
                 });
                 
-                await conn.query(`UPDATE users SET picture=${id}.png WHERE id=${id}`);
+                await conn.query(`UPDATE users SET picture="${id}.png" WHERE id=${id}`);
             }
 
             res.sendStatus(200);
