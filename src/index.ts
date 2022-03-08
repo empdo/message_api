@@ -245,7 +245,7 @@ pool.getConnection()
             const user = await getUser(conn, id);
             console.log(user);
 
-            res.send({ messages: conversation, name: user.name, pictrue: user.pictrue});
+            res.send({ messages: conversation, name: user.name, picture: user.picture});
         });
 
         app.get("/conversations", async (req, res) => {
