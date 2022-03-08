@@ -182,6 +182,7 @@ pool.getConnection()
             id int(11) NOT NULL AUTO_INCREMENT,
             name varchar(255) NOT NULL,
             password binary(60) NOT NULL,
+            picture varchar(255),
             PRIMARY KEY (id)
           )`);
 
@@ -284,6 +285,8 @@ pool.getConnection()
                fs.writeFile(`./pictures/${id}.png`, base64Data, 'base64', () => {
                   console.log("error");
                 });
+                
+                conn.query(`UPDATE users SET picture=${id}.png WHERE id=${id}`);
             }
 
             res.sendStatus(200);
