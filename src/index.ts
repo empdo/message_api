@@ -141,15 +141,17 @@ const getConversation = async (conn: mariadb.PoolConnection, userId: number, con
 const getConversations = async (conn: mariadb.PoolConnection, id: number) => {
     const messages = await conn.query("SELECT * FROM messages WHERE receiver = ? or sender = ?", [id, id]);
 
-    const conversations: {id: number, name: string, lastmessage: number}[]  = [];
+    const conversations: {id: number, name: string, lastmessage: number, picture: string | null}[]  = [];
 
     for (const message of messages) {
         const realId = message.sender === id ? message.receiver : message.sender;
 
         const conversation = conversations.find(conversation => conversation.id === realId);
-
+        
         if (!conversation){
-            conversations.push({id : realId, name : (await getUser(conn, realId)).name, lastmessage: message.date});
+            const user = await getUser(conn, realId);
+
+            conversations.push({id : realId, name : user.name, lastmessage: message.date, picture: user.picture});
         }else {
             conversation.lastmessage = conversation.lastmessage < message.date ? message.date : conversation.lastmessage;
         }
@@ -244,8 +246,9 @@ pool.getConnection()
             const conversation = await getConversation(conn, userId, id);
             const user = await getUser(conn, id);
 
+
             if(user) {
-                res.send({ messages: conversation, name: user["name"], picture: user["picture"]});
+                res.send({ messages: conversation, name: user.name, picture: user.picture});
             }else {
                 res.sendStatus(202)
             }
