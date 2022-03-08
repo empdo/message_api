@@ -244,7 +244,7 @@ pool.getConnection()
             const conversation = await getConversation(conn, userId, id);
             const user = await getUser(conn, id);
 
-            if(user["name"]) {
+            if(user) {
                 res.send({ messages: conversation, name: user["name"], picture: user["picture"]});
             }else {
                 res.sendStatus(202)
