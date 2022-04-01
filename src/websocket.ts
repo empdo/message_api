@@ -27,8 +27,8 @@ em.on("dbChange", (message: Message) => {
   sendFromEm(1, message, message.receiver);
 });
 
-em.on("picChange", (blob: String, id: number) => {
-  sendFromEm(2, blob, id);
+em.on("picChange", (id: number) => {
+  sendFromEm(2, "change", id);
 });
 
 app.ws("/", (ws, req) => {
