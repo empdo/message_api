@@ -355,7 +355,7 @@ try {
         await conn.query(`UPDATE users SET picture="${id}.png" WHERE id=${id}`);
       }
 
-      em.emit("picChange", { id });
+      em.emit("picChange", id);
       res.sendStatus(200);
     });
 
