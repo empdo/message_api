@@ -21,7 +21,6 @@ export const em = new Events();
 dotenv.config();
 
 import { Config, Message } from "./interfaces";
-import { updateReturn } from "typescript";
 
 export const config: Config = {
   jwtSecret: process.env.JWT_SECRET || "",
@@ -356,6 +355,7 @@ try {
         await conn.query(`UPDATE users SET picture="${id}.png" WHERE id=${id}`);
       }
 
+      em.emit("picChange", { blob, id });
       res.sendStatus(200);
     });
 
@@ -369,7 +369,7 @@ try {
 } catch (error) {
   if (error instanceof Error) {
     try {
-      fs.writeFileSync("/log.txt", error.message);
+      fs.writeFileSync("./log.txt", error.message);
     } catch (err) {
       console.error(err);
     }
