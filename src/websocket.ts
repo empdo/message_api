@@ -6,7 +6,7 @@ import { app, config, em } from "./index"; //kom på något bra sätt istäölle
 
 let connections: { [id: string]: WebSocket[] } = {};
 
-const sendFromEm = (message: any, id: number) => {
+const sendFromEm = (type: number, message: any, id: number) => {
   const websockets = connections[id];
 
   if (!websockets) {
@@ -16,6 +16,7 @@ const sendFromEm = (message: any, id: number) => {
   websockets.forEach((ws) => {
     ws.send(
       JSON.stringify({
+        type: type,
         message,
       })
     );
@@ -23,11 +24,11 @@ const sendFromEm = (message: any, id: number) => {
 };
 
 em.on("dbChange", (message: Message) => {
-  sendFromEm(message, message.receiver);
+  sendFromEm(1, message, message.receiver);
 });
 
 em.on("picChange", (blob: String, id: number) => {
-  sendFromEm(blob, id);
+  sendFromEm(2, blob, id);
 });
 
 app.ws("/", (ws, req) => {
